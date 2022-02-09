@@ -5,13 +5,23 @@
 #include <SPI.h>
 #include <SD.h>
 #include <SDConfig.h>
+#include <Adafruit_NeoPixel.h>
 
 const int chipSelect = D4;
 char configFile[] = "network.conf";
 
+// How many NeoPixels on the stick?
+#define NUM_PIXELS 234
+#define DIN_PIN D2
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_PIXELS, DIN_PIN, NEO_GRB + NEO_KHZ800);
+
 char* ssid;
 char* password;
 char* host_name;
+
+int r = 128;
+int g = 128;
+int b = 128;
 
 ESP8266WebServer server(80);
 
@@ -24,10 +34,35 @@ class MyHandler : public RequestHandler {
 
   bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {    
     String contentType;
+    Serial.println(requestUri);
     if (requestUri.equals("/")) {
       requestUri = "/index.html";
     }
-    if (SD.exists(requestUri)){
+    
+    if (requestUri.equals("/api")) {
+      handleAPICall();
+      return true;
+    }    
+
+    if (requestUri.endsWith(".html")) contentType = "text/html";
+    else if (requestUri.endsWith(".css")) contentType = "text/css";
+    else if (requestUri.endsWith(".js")) contentType = "text/javascript";
+    else if (requestUri.endsWith(".ico")) contentType = "image/x-icon";
+    else if (requestUri.endsWith(".png")) contentType = "image/png";
+    else if (requestUri.endsWith(".jpg")) contentType = "image/jpg";
+    else if (requestUri.endsWith(".jpeg")) contentType = "image/jpeg";
+    else if (requestUri.endsWith(".gif")) contentType = "image/gif";
+    else if (requestUri.endsWith(".svg")) contentType = "image/svg+xml";
+    else if (requestUri.endsWith(".webp")) contentType = "image/webp";
+    else if (requestUri.endsWith(".avif")) contentType = "image/avif";
+    else if (requestUri.endsWith(".apng")) contentType = "image/apng";
+          
+    if (SD.exists(requestUri)){      
+      Serial.print("Request: ");
+      Serial.print(requestUri);
+      Serial.print(" 200 ");
+      Serial.println(contentType);
+    
       File fd = SD.open(requestUri, "r");
       
       size_t filesize = fd.size(); //the size of the file in bytes     
@@ -36,30 +71,48 @@ class MyHandler : public RequestHandler {
       
       fd.read((uint8_t *)string, sizeof(string));  
       fd.close();
-
-      if (requestUri.endsWith(".html")) contentType = "text/html";
-      else if (requestUri.endsWith(".css")) contentType = "text/css";
-      else if (requestUri.endsWith(".js")) contentType = "text/javascript";
-      else if (requestUri.endsWith(".ico")) contentType = "image/x-icon";
-      else if (requestUri.endsWith(".png")) contentType = "image/png";
-      else if (requestUri.endsWith(".jpg")) contentType = "image/jpg";
-      else if (requestUri.endsWith(".jpeg")) contentType = "image/jpeg";
-      else if (requestUri.endsWith(".gif")) contentType = "image/gif";
-      else if (requestUri.endsWith(".svg")) contentType = "image/svg+xml";
-      else if (requestUri.endsWith(".webp")) contentType = "image/webp";
-      else if (requestUri.endsWith(".avif")) contentType = "image/avif";
-      else if (requestUri.endsWith(".apng")) contentType = "image/apng";
-      
-      Serial.print("Request: ");
-      Serial.print(requestUri);
-      Serial.print(" 200 ");
-      Serial.println(contentType);
       
       server.send(200, contentType, string);
       return true;
     } else {
+      Serial.print("Request: ");
+      Serial.print(requestUri);
+      Serial.print(" 404 ");
+      Serial.println(contentType);
       handleNotFound();
     }
+  }
+
+  void handleAPICall() {
+    String response;
+    if (server.method() == HTTP_GET) {
+      server.send(400, "text/plain", "Bad request");
+      return;
+    }
+    
+    for (uint8_t i = 0; i < server.args(); i++) {
+      if (server.argName(i).equals("r")) r = server.arg(i).toInt();
+      if (server.argName(i).equals("g")) g = server.arg(i).toInt();
+      if (server.argName(i).equals("b")) b = server.arg(i).toInt();
+    }
+
+    updateStripColor();
+
+    response = String(r);
+    response += ",";
+    response += String(g);
+    response += ",";
+    response += String(b);
+    
+    Serial.println(response);
+    server.send(200, "text/plain", response);
+  }
+
+  void updateStripColor() {
+    for(int i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, strip.Color(r, g, b));
+    }
+    strip.show();
   }
   
   void handleNotFound() {
@@ -124,6 +177,12 @@ bool readConfig() {
   return true;
 }
 
+bool initLEDs() {
+  strip.begin();
+  strip.show(); // Start with all pixels off
+  return true;
+}
+
 bool initWifi() {  
   WiFi.hostname(host_name);
   WiFi.mode(WIFI_STA);
@@ -155,6 +214,9 @@ void setup(void) {
   
   // Read the config file
   if (!readConfig()) return;
+  
+  // Configure the wifi connection
+  if (!initLEDs()) return;
   
   // Configure the wifi connection
   if (!initWifi()) return;
