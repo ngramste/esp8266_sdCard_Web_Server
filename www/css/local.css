@@ -1,0 +1,15 @@
+#colorPicker {
+  /* background-color: aquamarine; */
+}
+
+input {
+  display: block;
+  width:100%;
+  height:48px;
+}
+
+#selectedColor {
+  width: 100%;
+  height: 200px;
+  background-color: gray;
+}

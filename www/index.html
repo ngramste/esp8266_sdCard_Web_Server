@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <title>Colors!</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/local.css">
+  </head>
+  <body class="w3-theme-l4">
+    <div id="colorPicker">
+      <div id="selectedColor"></div>
+      <div class="slidecontainer">
+        <input type="range" min="1" max="255" value="128" class="slider" id="r" oninput="updateColor()" onchange="updateAPI()">
+        <input type="range" min="1" max="255" value="128" class="slider" id="g" oninput="updateColor()" onchange="updateAPI()">
+        <input type="range" min="1" max="255" value="128" class="slider" id="b" oninput="updateColor()" onchange="updateAPI()">
+      </div>
+    </div>
+  </body>
+
+  <script src="./js/color.js"></script>
+</html>
