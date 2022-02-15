@@ -1,15 +1,69 @@
+* {
+  padding: 0px;
+  margin: 0px;
+}
+
+body {
+  background-color: black;
+  overflow: hidden;
+}
+
 #colorPicker {
-  /* background-color: aquamarine; */
+  display: grid;
+  grid-template-areas: 'color .' 'color .' 'color .' 'color .';
+  grid-template-rows: 25vh 25vh 25vh 25vh;
+  grid-template-columns: 40vw 60vw;
+}
+
+#selectedColor {
+  grid-area: color;
+  background-color: gray;
 }
 
 input {
   display: block;
-  width:100%;
-  height:48px;
+  /* width: 60vh;
+  height: 25vw; */
 }
 
-#selectedColor {
-  width: 100%;
-  height: 200px;
-  background-color: gray;
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1vw;
+  height: 25vh;
+  border-radius: 0%;
+  background: #04AA6D;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 1vw;
+  height: 25vh;
+  border-radius: 0%;
+  background: #04AA6D;
+  cursor: pointer;
+}
+
+#r {
+  -webkit-appearance: none;
+  background-image: linear-gradient(to left, red, black);
+  border: solid black;
+}
+
+#g {
+  -webkit-appearance: none;
+  background-image: linear-gradient(to left, green, black);
+  border: solid black;
+}
+
+#b {
+  -webkit-appearance: none;
+  background-image: linear-gradient(to left, blue, black);
+  border: solid black;
+}
+
+#l {
+  -webkit-appearance: none;
+  background-image: linear-gradient(to left, white, black);
+  border: solid black;
 }
