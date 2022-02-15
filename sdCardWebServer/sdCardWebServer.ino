@@ -22,6 +22,7 @@ char* host_name;
 int r = 128;
 int g = 128;
 int b = 128;
+int l = 100;
 
 ESP8266WebServer server(80);
 
@@ -65,14 +66,11 @@ class MyHandler : public RequestHandler {
     
       File fd = SD.open(requestUri, "r");
       
-      size_t filesize = fd.size(); //the size of the file in bytes     
-      char string[filesize + 1];
-      memset(string, 0, filesize + 1);
+      size_t filesize = fd.size(); //the size of the file in bytes
+
+      server.streamFile(fd, contentType);
       
-      fd.read((uint8_t *)string, sizeof(string));  
-      fd.close();
-      
-      server.send(200, contentType, string);
+      fd.close();      
       return true;
     } else {
       Serial.print("Request: ");
@@ -94,6 +92,7 @@ class MyHandler : public RequestHandler {
       if (server.argName(i).equals("r")) r = server.arg(i).toInt();
       if (server.argName(i).equals("g")) g = server.arg(i).toInt();
       if (server.argName(i).equals("b")) b = server.arg(i).toInt();
+      if (server.argName(i).equals("l")) l = server.arg(i).toInt();
     }
 
     updateStripColor();
@@ -103,6 +102,8 @@ class MyHandler : public RequestHandler {
     response += String(g);
     response += ",";
     response += String(b);
+    response += ",";
+    response += String(l);
     
     Serial.println(response);
     server.send(200, "text/plain", response);
@@ -110,7 +111,7 @@ class MyHandler : public RequestHandler {
 
   void updateStripColor() {
     for(int i=0; i<strip.numPixels(); i++) {
-      strip.setPixelColor(i, strip.Color(r, g, b));
+      strip.setPixelColor(i, strip.Color(r * l / 100, g * l / 100, b * l / 100));
     }
     strip.show();
   }
@@ -183,7 +184,7 @@ bool initLEDs() {
   return true;
 }
 
-bool initWifi() {  
+bool initWifi() {
   WiFi.hostname(host_name);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -207,8 +208,10 @@ bool initWifi() {
 void setup(void) {
   pinMode(led, OUTPUT);
   digitalWrite(led, 0);
-  Serial.begin(74880);
+  Serial.begin(115200);
 
+  Serial.println("");
+  
   // Initialize the SD card
   if (!initSDCard()) return;
   

@@ -10,9 +10,10 @@
     <div id="colorPicker">
       <div id="selectedColor"></div>
       <div class="slidecontainer">
-        <input type="range" min="1" max="255" value="128" class="slider" id="r" oninput="updateColor()" onchange="updateAPI()">
-        <input type="range" min="1" max="255" value="128" class="slider" id="g" oninput="updateColor()" onchange="updateAPI()">
-        <input type="range" min="1" max="255" value="128" class="slider" id="b" oninput="updateColor()" onchange="updateAPI()">
+        <input type="range" min="0" max="255" value="128" class="slider" id="r" oninput="updateAPI(false)" onchange="updateAPI(true)">
+        <input type="range" min="0" max="255" value="128" class="slider" id="g" oninput="updateAPI(false)" onchange="updateAPI(true)">
+        <input type="range" min="0" max="255" value="128" class="slider" id="b" oninput="updateAPI(false)" onchange="updateAPI(true)">
+        <input type="range" min="0" max="100" value="128" class="slider" id="l" oninput="updateAPI(false)" onchange="updateAPI(true)">
       </div>
     </div>
   </body>
